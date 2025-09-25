@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
     email: {
@@ -9,19 +8,15 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         trim: true
     },
-    password: {
-        type: String,
-        required: function() {
-            return this.loginType === 'manual';
-        }
-    },
     name: {
         type: String,
-        required: true
+        required: function() {
+            return this.loginType === 'oauth';
+        }
     },
     loginType: {
         type: String,
-        enum: ['manual', 'oauth'],
+        enum: ['email', 'oauth'],
         required: true
     },
     googleId: {
@@ -30,22 +25,18 @@ const userSchema = new mongoose.Schema({
             return this.loginType === 'oauth';
         }
     },
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+    otp: {
+        type: String
+    },
+    otpExpires: {
+        type: Date
+    }
 }, {
     timestamps: true
 });
-
-// Hash password before saving for manual login
-userSchema.pre('save', async function(next) {
-    if (this.loginType === 'manual' && this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, 10);
-    }
-    next();
-});
-
-// Method to compare password for manual login
-userSchema.methods.comparePassword = async function(candidatePassword) {
-    if (this.loginType !== 'manual') return false;
-    return await bcrypt.compare(candidatePassword, this.password);
-};
 
 module.exports = mongoose.model('User', userSchema);
