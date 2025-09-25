@@ -10,6 +10,8 @@ app.use(cookieParser());
 app.use("/uploads", express.static("uploads"));
 
 // Routes
-app.use('/api', require('./routes/oauth'));
+app.use('/api', require('./routes/user'));
+app.use('/api', require('./routes/signup'));
+app.use('/api', require('./routes/interest'));
 
 module.exports = app;
