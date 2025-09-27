@@ -5,6 +5,8 @@ const { authenticateToken } = require('../middlewares/auth');
 
 router.put('/profile', authenticateToken, user.addProfileDetails);
 router.put('/preferences', authenticateToken, user.updatePreferences);
-router.put('/difficulty', authenticateToken, user.updateDifficulty);
+router.post('/set-difficulty', authenticateToken, user.setDifficulty);
+router.post('/set-community', authenticateToken, user.setCommunity);
+router.post('/set-notifications', authenticateToken, user.setNotification);
 
 module.exports = router;

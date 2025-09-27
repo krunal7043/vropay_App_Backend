@@ -64,7 +64,7 @@ const userSchema = new mongoose.Schema(
     },
     notifications: {
       type: String,
-      enum: ["Allowed", "Blocked"]
+      enum: ["Allowed", "Not allowed"]
     },
   },
   {

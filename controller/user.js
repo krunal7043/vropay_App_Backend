@@ -79,14 +79,8 @@ exports.updatePreferences = async (req, res) => {
     }
 };
 
-exports.updateDifficulty = async (req, res) => {
+exports.setDifficulty = async (req, res) => {
     try {
-        console.log('body:', req.body);
-        
-        if (!req.body || Object.keys(req.body).length === 0) {
-            return res.status(400).json({ success: false, message: 'Request body is empty' });
-        }
-
         const { difficulty } = req.body;
         const userId = req.userId;
 
@@ -98,24 +92,111 @@ exports.updateDifficulty = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid difficulty level' });
         }
 
+        const existingUser = await User.findById(userId);
+        
+        if (!existingUser) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found. Please complete signup first.'
+            });
+        }
+
+        const isFirstTime = !existingUser.difficulty;
+        
         const user = await User.findByIdAndUpdate(
             userId,
             { difficulty },
             { new: true }
         );
 
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-
         res.status(200).json({
             success: true,
-            message: 'Difficulty level updated successfully',
+            message: isFirstTime ? 'Difficulty level set successfully' : 'Difficulty level updated successfully',
             difficulty: user.difficulty
         });
 
     } catch (error) {
         console.error('Difficulty update error:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+exports.setCommunity = async (req, res) => {
+    try {
+        const { community } = req.body;
+        const userId = req.userId;
+
+        if (!community) {
+            return res.status(400).json({ success: false, message: 'Community preference is required' });
+        }
+
+        if (!['In', 'Out'].includes(community)) {
+            return res.status(400).json({ success: false, message: 'Invalid community preference' });
+        }
+
+        const existingUser = await User.findById(userId);
+        
+        if (!existingUser) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found. Please complete signup first.'
+            });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { community },
+            { new: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Community preference set successfully',
+            community: user.community
+        });
+
+    } catch (error) {
+        console.error('Community update error:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+exports.setNotification = async (req, res) => {
+    try {
+        const { notifications } = req.body;
+        const userId = req.userId;
+
+        if (!notifications) {
+            return res.status(400).json({ success: false, message: 'Notification preference is required' });
+        }
+
+        if (!['Allowed', 'Not allowed'].includes(notifications)) {
+            return res.status(400).json({ success: false, message: 'Invalid notification preference' });
+        }
+
+        const existingUser = await User.findById(userId);
+        
+        if (!existingUser) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found. Please complete signup first.'
+            });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { notifications },
+            { new: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Notification preference set successfully',
+            notifications: user.notifications
+        });
+
+    } catch (error) {
+        console.error('Notifications update error:', error);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
