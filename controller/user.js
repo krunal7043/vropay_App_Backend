@@ -78,3 +78,44 @@ exports.updatePreferences = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
+
+exports.updateDifficulty = async (req, res) => {
+    try {
+        console.log('body:', req.body);
+        
+        if (!req.body || Object.keys(req.body).length === 0) {
+            return res.status(400).json({ success: false, message: 'Request body is empty' });
+        }
+
+        const { difficulty } = req.body;
+        const userId = req.userId;
+
+        if (!difficulty) {
+            return res.status(400).json({ success: false, message: 'Difficulty level is required' });
+        }
+
+        if (!['Beginner', 'Intermediate', 'Advance'].includes(difficulty)) {
+            return res.status(400).json({ success: false, message: 'Invalid difficulty level' });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { difficulty },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Difficulty level updated successfully',
+            difficulty: user.difficulty
+        });
+
+    } catch (error) {
+        console.error('Difficulty update error:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
