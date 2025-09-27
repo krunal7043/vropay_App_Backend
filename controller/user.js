@@ -200,3 +200,39 @@ exports.setNotification = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
+
+exports.getUserProfile = async (req, res) => {
+    try {
+        const userId = req.userId;
+
+        const user = await User.findById(userId).populate('interests');
+        
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            user: {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                gender: user.gender,
+                profession: user.profession,
+                interests: user.interests,
+                difficulty: user.difficulty,
+                community: user.community,
+                notifications: user.notifications
+            }
+        });
+
+    } catch (error) {
+        console.error('Get user profile error:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
