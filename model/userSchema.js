@@ -44,11 +44,11 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ["male", "female", "don't want to disclose"],
+      enum: ["Male", "Female", "Don't want to disclose"],
     },
     profession: {
       type: String,
-      enum: ["student", "working professional", "business owner"],
+      enum: ["Student", "Working professional", "Business owner"],
     },
     interests: [{
       type: mongoose.Schema.Types.ObjectId,
@@ -65,9 +65,6 @@ const userSchema = new mongoose.Schema(
     notifications: {
       type: String,
       enum: ["Allowed", "Not allowed"]
-    },
-    profileImage: {
-      type: String
     },
   },
   {
