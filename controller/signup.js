@@ -5,7 +5,7 @@ const { sendOTP } = require("../services/emailService");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// Google Signup
+// Google Auth (Signin/Signup)
 exports.googleAuth = async (req, res) => {
   try {
     const { idToken } = req.body;
@@ -35,29 +35,29 @@ exports.googleAuth = async (req, res) => {
 
     // Check if user exists
     let user = await User.findOne({ email });
+    let isNewUser = false;
 
     if (user) {
-      // If user exists but not with OAuth, return error
+      // User exists - Sign in
+      // Update to OAuth if not already
       if (user.loginType !== "oauth") {
-        return res.status(400).json({
-          success: false,
-          message: "Email already registered with manual login",
-        });
-      }
-      // Update googleId if not set
-      if (!user.googleId) {
+        user.loginType = "oauth";
         user.googleId = googleId;
+        user.name = name;
+        user.isVerified = true;
         await user.save();
       }
     } else {
-      // Create new user
+      // User doesn't exist - Sign up
       user = new User({
         email,
         name,
         loginType: "oauth",
         googleId,
+        isVerified: true
       });
       await user.save();
+      isNewUser = true;
     }
 
     // Generate JWT token
@@ -69,8 +69,9 @@ exports.googleAuth = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Login successful",
+      message: isNewUser ? "Signup successful" : "Login successful",
       token,
+      isNewUser,
       user: {
         id: user._id,
         email: user.email,
