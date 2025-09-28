@@ -13,5 +13,6 @@ app.use("/uploads", express.static("uploads"));
 app.use('/api', require('./routes/user'));
 app.use('/api', require('./routes/signup'));
 app.use('/api', require('./routes/interest'));
+app.use('/api', require('./routes/learnScreen'));
 
 module.exports = app;
