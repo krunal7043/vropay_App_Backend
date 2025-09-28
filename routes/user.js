@@ -9,5 +9,6 @@ router.post('/set-difficulty', authenticateToken, user.setDifficulty);
 router.post('/set-community', authenticateToken, user.setCommunity);
 router.post('/set-notifications', authenticateToken, user.setNotification);
 router.get('/profile', authenticateToken, user.getUserProfile);
+router.post('/logout', authenticateToken, user.logout);
 
 module.exports = router;

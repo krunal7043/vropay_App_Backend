@@ -236,3 +236,10 @@ exports.getUserProfile = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
+
+exports.logout = async (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: 'Logged out successfully'
+    });
+};
