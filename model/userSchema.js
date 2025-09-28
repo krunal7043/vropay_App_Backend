@@ -31,10 +31,15 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
     otp: {
-      type: String,
+      type: Number,
     },
     otpExpires: {
       type: Date,
+    },
+    newEmail: {
+      type: String,
+      lowercase: true,
+      trim: true,
     },
     firstName: {
       type: String,

@@ -1,4 +1,5 @@
 const User = require('../model/userSchema');
+const { sendEmailUpdateOTP } = require('../services/emailService');
 
 exports.addProfileDetails = async (req, res) => {
     try {
@@ -272,6 +273,93 @@ exports.updateGeneralDetails = async (req, res) => {
 
     } catch (error) {
         console.error('General details update error:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+exports.profileEmailUpdate = async (req, res) => {
+    try {
+        const { newEmail } = req.body;
+        const userId = req.userId;
+
+        if (!newEmail) {
+            return res.status(400).json({ success: false, message: 'New email is required' });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newEmail)) {
+            return res.status(400).json({ success: false, message: 'Invalid email format' });
+        }
+
+        const existingUser = await User.findOne({ email: newEmail });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: 'Email already exists' });
+        }
+
+        const otpCode = Math.floor(10000 + Math.random() * 90000);
+        const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+        await User.findByIdAndUpdate(userId, {
+            newEmail,
+            otp: otpCode,
+            otpExpires
+        });
+
+        await sendEmailUpdateOTP(newEmail, otpCode);
+
+        res.status(200).json({
+            success: true,
+            message: 'Verification code sent to new email'
+        });
+
+    } catch (error) {
+        console.error('Email update request error:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+exports.verifyUpdateEmail = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        const userId = req.userId;
+
+        if (!otp) {
+            return res.status(400).json({ success: false, message: 'OTP is required' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        if (!user.otp || !user.newEmail) {
+            return res.status(400).json({ success: false, message: 'No email update request found' });
+        }
+
+        if (user.otpExpires < new Date()) {
+            return res.status(400).json({ success: false, message: 'OTP has expired' });
+        }
+
+        if (user.otp !== otp) {
+            return res.status(400).json({ success: false, message: 'Invalid OTP' });
+        }
+
+        await User.findByIdAndUpdate(userId, {
+            email: user.newEmail,
+            $unset: {
+                newEmail: 1,
+                otp: 1,
+                otpExpires: 1
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Email updated successfully'
+        });
+
+    } catch (error) {
+        console.error('Email update verification error:', error);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };

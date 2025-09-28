@@ -25,4 +25,19 @@ const sendOTP = async (email, otp) => {
   await transporter.sendMail(mailOptions);
 };
 
-module.exports = { sendOTP };
+const sendEmailUpdateOTP = async (email, otp) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "VroPay - Email Update Verification",
+    html: `
+            <h2>Email Update Verification</h2>
+            <p>Your OTP for email update verification is: <strong>${otp}</strong></p>
+            <p>This OTP will expire in 10 minutes.</p>
+        `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+module.exports = { sendOTP, sendEmailUpdateOTP };
