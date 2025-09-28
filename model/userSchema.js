@@ -66,6 +66,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["Allowed", "Not allowed"]
     },
+    profileImage: {
+      type: String
+    },
   },
   {
     timestamps: true,

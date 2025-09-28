@@ -237,6 +237,45 @@ exports.getUserProfile = async (req, res) => {
     }
 };
 
+exports.updateGeneralDetails = async (req, res) => {
+    try {
+        const { firstName, lastName, gender } = req.body;
+        const userId = req.userId;
+        
+        const updateData = {};
+        if (firstName) updateData.firstName = firstName;
+        if (lastName) updateData.lastName = lastName;
+        if (gender) updateData.gender = gender;
+        if (req.file) updateData.profileImage = req.file.filename;
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            updateData,
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'General details updated successfully',
+            user: {
+                id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                gender: user.gender,
+                profileImage: user.profileImage
+            }
+        });
+
+    } catch (error) {
+        console.error('General details update error:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
 exports.logout = async (req, res) => {
     res.status(200).json({
         success: true,
